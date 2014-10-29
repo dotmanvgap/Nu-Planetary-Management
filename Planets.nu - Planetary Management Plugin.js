@@ -1,6 +1,6 @@
 // ==UserScript==
-// @name          Planets.nu - Planetary Management Plugin v2
-// @description   Planetary Management Plugin v2
+// @name          Planets.nu - Planetary Management Plugin
+// @description   Planetary Management Plugin
 // @version       3.0
 // @copyright	  2014, Dotman
 // @license		  CC BY-NC-ND 4.0 (http://creativecommons.org/licenses/by-nc-nd/4.0/)
