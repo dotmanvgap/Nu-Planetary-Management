@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name          Planets.nu - Planetary Management Plugin
 // @description   Planetary Management Plugin
-// @version       3.0
+// @version       3.1
 // @copyright	  2014, Dotman
 // @license		  CC BY-NC-ND 4.0 (http://creativecommons.org/licenses/by-nc-nd/4.0/)
 // @author        Dotman
@@ -33,6 +33,8 @@
 //								FC randomize button bug fixed
 //								Fed 200% Taxing bug fixed
 //								Default tax method growth tax, at popmax, taxed only down to 50; adjusted back to 40 (bug came in in v2.0?)
+// @history		  3.1	 Starmap Overlay can now be toggled 
+//						 Global apply buttons moved back to top
 // ==/UserScript==
 
 
@@ -43,7 +45,7 @@ function wrapper () { // wrapper for injection
         return;	
     }
     
-    var plugin_version = 3.0;
+    var plugin_version = 3.1;
     var debug = false;
     
     console.log("Map Beta: Planetary Manager plugin version: v" + plugin_version );
@@ -279,6 +281,19 @@ background-color: rgba(30,30,30,30.2); \
 padding: 3px; \
 box-shadow: 2px 2px 2px #777777}");
 
+vgap.plugins["plManagerPlugin"].addCss("#PMMapExpBtn { \
+position: absolute; \
+color: white; \
+font-size: 12px; \
+text-align: center; \
+font-weight: bold; \
+top: 58px; \
+right: 6px; \
+width: 15px; \
+background-color: rgba(30,30,30,30.2); \
+padding: 0px; \
+box-shadow: 1px 1px 1px #777777}");
+
 			vgap.plugins["plManagerPlugin"].addCss("#PMMapDrawBar { \
 position: absolute; \
 color: white; \
@@ -371,6 +386,10 @@ box-shadow: 2px 2px 2px #777777}");
 					plg.pmmiNormal[i] = new Image();
 					plg.pmmiHover[i] = new Image();
 				}
+				
+				plg.pmmiExpImg = new Image();
+				plg.pmmiExpImg.src = 'http://planets.nu/_library/2014/11/expmenu.jpg';
+				
 				plg.pmmiNormal[0].src = 'http://planets.nu/_library/2014/10/neut2mid.png';
 				plg.pmmiNormal[1].src = 'http://planets.nu/_library/2014/10/dur2mid.png';
 				plg.pmmiNormal[2].src = 'http://planets.nu/_library/2014/10/trit2mid.png';
@@ -430,7 +449,7 @@ box-shadow: 2px 2px 2px #777777}");
                 plg.pmmBtns[16] = '#PMMapBtnBarSBBuild';
                 plg.pmmBtns[17] = '#PMMapBtnBarSBTech';
                 //plg.pmmBtns[18] = '#PMMapBtnBarSBDef';
-                
+
                 if (debug) console.log("END PROCESS LOAD");
             },	
         
@@ -464,6 +483,7 @@ box-shadow: 2px 2px 2px #777777}");
 				*/ 
 				$('#PMMapBtnBar').remove();
 				$('#PMMapDrawBar').remove();
+				$('#PMMapExpBtn').remove();
             },
         
         /*
@@ -505,36 +525,100 @@ box-shadow: 2px 2px 2px #777777}");
         },
         
         displayPMMapMenu: function() {
-			$('#PMMapBtnBar').remove();
 			var plg = vgap.plugins["plManagerPlugin"];
+			console.log("DRAW MAP MENU OVERLAY CALLED.");
+			// Set the layout css of the overlay menu:
+
+			$('#PMMapBtnBar').remove();
+			$('#PMMapExpBtn').remove();
+			
+			// The menu is hidden, just show the little expander button
+			var expbtnhtml = ""
+			expbtnhtml += '<div id="PMMapExpBtn"><img title="Show Overlays" src="' + vgap.plugins["plManagerPlugin"].pmmiExpImg.src + '"></img></div>';
+			$(expbtnhtml).appendTo(vgap.container);
 			
 			var mapmenuhtml = ""
-            mapmenuhtml += '<div id="PMMapBtnBar">Overlays';
-            mapmenuhtml += '<hr />General<span class="PMMapBtn" id="PMMapBtnBarName"><img title="Planet Names" src="' + vgap.plugins["plManagerPlugin"].pmmiNormal[4].src + '"></img></span>';
-            mapmenuhtml += '<span class="PMMapBtn" id="PMMapBtnBarTemp"><img title="Friendly Codes" src="' + vgap.plugins["plManagerPlugin"].pmmiNormal[5].src + '"></img></span>';
-            mapmenuhtml += '<hr />Minerals<span class="PMMapBtn" id="PMMapBtnBarNeut"><img title="Neutronium" src="' + vgap.plugins["plManagerPlugin"].pmmiNormal[0].src + '"></img></span>';
-            mapmenuhtml += '<span class="PMMapBtn" id="PMMapBtnBarDur"><img title="Duranium" src="' + vgap.plugins["plManagerPlugin"].pmmiNormal[1].src + '"></img></span>';
-            mapmenuhtml += '<span class="PMMapBtn" id="PMMapBtnBarTrit"><img title="Tritanium" src="' + vgap.plugins["plManagerPlugin"].pmmiNormal[2].src + '"></img></span>';
-            mapmenuhtml += '<span class="PMMapBtn" id="PMMapBtnBarMoly"><img title="Molybdenum" src="' + vgap.plugins["plManagerPlugin"].pmmiNormal[3].src + '"></img></span>';
-            mapmenuhtml += '<hr />Population<span class="PMMapBtn" id="PMMapBtnBarCols"><img title="Colonists" src="' + vgap.plugins["plManagerPlugin"].pmmiNormal[6].src + '"></img></span>';
-            mapmenuhtml += '<span class="PMMapBtn" id="PMMapBtnBarNats"><img title="Natives" src="' + vgap.plugins["plManagerPlugin"].pmmiNormal[7].src + '"></img></span>';
-            mapmenuhtml += '<span class="PMMapBtn" id="PMMapBtnBarColTax"><img title="Colonist Tax" src="' + vgap.plugins["plManagerPlugin"].pmmiNormal[8].src + '"></img></span>';
-            mapmenuhtml += '<span class="PMMapBtn" id="PMMapBtnBarNatTax"><img title="Native Tax" src="' + vgap.plugins["plManagerPlugin"].pmmiNormal[9].src + '"></img></span>';
-            mapmenuhtml += '<hr />Sup-MC<span class="PMMapBtn" id="PMMapBtnBarSup"><img title="Supplies" src="' + vgap.plugins["plManagerPlugin"].pmmiNormal[10].src + '"></img></span>';
-            mapmenuhtml += '<span class="PMMapBtn" id="PMMapBtnBarMC"><img title="Megacredits" src="' + vgap.plugins["plManagerPlugin"].pmmiNormal[11].src + '"></img></span>';
-            mapmenuhtml += '<hr />Structures<span class="PMMapBtn" id="PMMapBtnBarBM"><img title="Build Method" src="' + vgap.plugins["plManagerPlugin"].pmmiNormal[12].src + '"></img></span>';
-            mapmenuhtml += '<span class="PMMapBtn" id="PMMapBtnBarFact"><img title="Factories" src="' + vgap.plugins["plManagerPlugin"].pmmiNormal[13].src + '"></img></span>';
-            mapmenuhtml += '<span class="PMMapBtn" id="PMMapBtnBarMines"><img title="Mines" src="' + vgap.plugins["plManagerPlugin"].pmmiNormal[14].src + '"></img></span>';
-            mapmenuhtml += '<span class="PMMapBtn" id="PMMapBtnBarDP"><img title="Defense Posts" src="' + vgap.plugins["plManagerPlugin"].pmmiNormal[15].src + '"></img></span>';
-            mapmenuhtml += '<hr />Starbase<span class="PMMapBtn" id="PMMapBtnBarSBBuild"><img title="SB Building" src="' + vgap.plugins["plManagerPlugin"].pmmiNormal[16].src + '"></img></span>';
-            mapmenuhtml += '<span class="PMMapBtn" id="PMMapBtnBarSBTech"><img title="SB Tech and Defense" src="' + vgap.plugins["plManagerPlugin"].pmmiNormal[17].src + '"></img></span>';
-            //mapmenuhtml += '<span class="PMMapBtn" id="PMMapBtnBarSBDef"><img title="Defense Posts" src="' + vgap.plugins["plManagerPlugin"].pmmiNormal[2].src + '"></img></span>';
-            mapmenuhtml += '<hr /></div>';
-       
-            
-            //$("<div id='PMMapBtnBar'>Some Menu Stuff Beta </div>").appendTo(vgap.container);
-            $(mapmenuhtml).appendTo(vgap.container);
-            
+			mapmenuhtml += '<div id="PMMapBtnBar"><span id="PMMapBtnOverlay">Overlays</span>';
+			mapmenuhtml += '<hr />General<span class="PMMapBtn" id="PMMapBtnBarName"><img title="Planet Names" src="' + vgap.plugins["plManagerPlugin"].pmmiNormal[4].src + '"></img></span>';
+			mapmenuhtml += '<span class="PMMapBtn" id="PMMapBtnBarTemp"><img title="Friendly Codes" src="' + vgap.plugins["plManagerPlugin"].pmmiNormal[5].src + '"></img></span>';
+			mapmenuhtml += '<hr />Minerals<span class="PMMapBtn" id="PMMapBtnBarNeut"><img title="Neutronium" src="' + vgap.plugins["plManagerPlugin"].pmmiNormal[0].src + '"></img></span>';
+			mapmenuhtml += '<span class="PMMapBtn" id="PMMapBtnBarDur"><img title="Duranium" src="' + vgap.plugins["plManagerPlugin"].pmmiNormal[1].src + '"></img></span>';
+			mapmenuhtml += '<span class="PMMapBtn" id="PMMapBtnBarTrit"><img title="Tritanium" src="' + vgap.plugins["plManagerPlugin"].pmmiNormal[2].src + '"></img></span>';
+			mapmenuhtml += '<span class="PMMapBtn" id="PMMapBtnBarMoly"><img title="Molybdenum" src="' + vgap.plugins["plManagerPlugin"].pmmiNormal[3].src + '"></img></span>';
+			mapmenuhtml += '<hr />Population<span class="PMMapBtn" id="PMMapBtnBarCols"><img title="Colonists" src="' + vgap.plugins["plManagerPlugin"].pmmiNormal[6].src + '"></img></span>';
+			mapmenuhtml += '<span class="PMMapBtn" id="PMMapBtnBarNats"><img title="Natives" src="' + vgap.plugins["plManagerPlugin"].pmmiNormal[7].src + '"></img></span>';
+			mapmenuhtml += '<span class="PMMapBtn" id="PMMapBtnBarColTax"><img title="Colonist Tax" src="' + vgap.plugins["plManagerPlugin"].pmmiNormal[8].src + '"></img></span>';
+			mapmenuhtml += '<span class="PMMapBtn" id="PMMapBtnBarNatTax"><img title="Native Tax" src="' + vgap.plugins["plManagerPlugin"].pmmiNormal[9].src + '"></img></span>';
+			mapmenuhtml += '<hr />Sup-MC<span class="PMMapBtn" id="PMMapBtnBarSup"><img title="Supplies" src="' + vgap.plugins["plManagerPlugin"].pmmiNormal[10].src + '"></img></span>';
+			mapmenuhtml += '<span class="PMMapBtn" id="PMMapBtnBarMC"><img title="Megacredits" src="' + vgap.plugins["plManagerPlugin"].pmmiNormal[11].src + '"></img></span>';
+			mapmenuhtml += '<hr />Structures<span class="PMMapBtn" id="PMMapBtnBarBM"><img title="Build Method" src="' + vgap.plugins["plManagerPlugin"].pmmiNormal[12].src + '"></img></span>';
+			mapmenuhtml += '<span class="PMMapBtn" id="PMMapBtnBarFact"><img title="Factories" src="' + vgap.plugins["plManagerPlugin"].pmmiNormal[13].src + '"></img></span>';
+			mapmenuhtml += '<span class="PMMapBtn" id="PMMapBtnBarMines"><img title="Mines" src="' + vgap.plugins["plManagerPlugin"].pmmiNormal[14].src + '"></img></span>';
+			mapmenuhtml += '<span class="PMMapBtn" id="PMMapBtnBarDP"><img title="Defense Posts" src="' + vgap.plugins["plManagerPlugin"].pmmiNormal[15].src + '"></img></span>';
+			mapmenuhtml += '<hr />Starbase<span class="PMMapBtn" id="PMMapBtnBarSBBuild"><img title="SB Building" src="' + vgap.plugins["plManagerPlugin"].pmmiNormal[16].src + '"></img></span>';
+			mapmenuhtml += '<span class="PMMapBtn" id="PMMapBtnBarSBTech"><img title="SB Tech and Defense" src="' + vgap.plugins["plManagerPlugin"].pmmiNormal[17].src + '"></img></span>';
+			//mapmenuhtml += '<span class="PMMapBtn" id="PMMapBtnBarSBDef"><img title="Defense Posts" src="' + vgap.plugins["plManagerPlugin"].pmmiNormal[2].src + '"></img></span>';
+			mapmenuhtml += '<hr /></div>';
+			
+			$(mapmenuhtml).appendTo(vgap.container);
+			
+			
+			
+			// Set the layout css of the overlay menu:
+			if (plg.showOverlayMenu == true) {
+				console.log("SHOWOVERLAY: " + plg.showOverlayMenu + " - Setting css exp btn offscreen.");
+				$("#PlanetsLoc").css("right","68px");
+				$("#PMMapBtnBar").css("right","6px");
+				$("#PMMapExpBtn").css("right","-25px");
+			}
+			else {
+				console.log("SHOWOVERLAY: " + plg.showOverlayMenu + " - Setting css menu bar offscreen.");
+				$("#PlanetsLoc").css("right","24px");
+				$("#PMMapBtnBar").css("right","-58px");
+				$("#PMMapExpBtn").css("right","4px");
+			}
+			
+			$('#PMMapBtnOverlay').click(function() {
+				//vgap.hotkeysOn = false;
+				plg.showOverlayMenu = false;
+				$('#PlanetsLoc').animate(
+					{
+						// 68 planetloc, 52 width on mapbtn, 6px on right; new menu 26px, lets give 4 px buffer
+						right:'20px'
+					},400);
+				$('#PMMapBtnBar').animate(
+					{
+						// 68 planetloc, 52 width on mapbtn, 6px on right; new menu 26px, lets give 4 px buffer
+						right:'-58px'
+					},400);
+				$('#PMMapExpBtn').animate(
+					{
+						right:'4px'
+					},400);
+				});
+			
+			$('#PMMapExpBtn').click(function() {
+				//vgap.hotkeysOn = false;
+				plg.showOverlayMenu = true;
+				$('#PlanetsLoc').animate(
+					{
+						// 68 planetloc, 52 width on mapbtn, 6px on right; new menu 26px, lets give 4 px buffer
+						right:'68px'
+					},400);
+				$('#PMMapBtnBar').animate(
+					{
+						// 68 planetloc, 52 width on mapbtn, 6px on right; new menu 26px, lets give 4 px buffer
+						right:'6px'
+					},400);
+				$('#PMMapExpBtn').animate(
+					{
+						right:'-25px'
+					},400);
+				});
+			
+			//$("<div id='PMMapBtnBar'>Some Menu Stuff Beta </div>").appendTo(vgap.container);
+			
+			
 			$('#PMMapBtnBarNeut').hover(vgap.plugins["plManagerPlugin"].makePMMapBtnHovOnFunc(0),
 										vgap.plugins["plManagerPlugin"].makePMMapBtnHovOffFunc(0));
 			$('#PMMapBtnBarDur').hover(vgap.plugins["plManagerPlugin"].makePMMapBtnHovOnFunc(1),
@@ -614,23 +698,23 @@ box-shadow: 2px 2px 2px #777777}");
 					},400);
 				});
 			*/
-			
+			/*
 			var mapdrawmenuhtml = ""
-            mapdrawmenuhtml += '<div id="PMMapDrawBar">Draw';
-            mapdrawmenuhtml += '<hr />General<span class="PMDrawBtn" id="PMMapBtnBarName"><img title="Planet Names" src="' + vgap.plugins["plManagerPlugin"].pmmiNormal[0].src + '"></img></span>';
-            mapdrawmenuhtml += '<span class="PMDrawBtn" id="PMDrawBtnSelect"><img title="Select" src="' + vgap.plugins["plManagerPlugin"].pmmiNormal[2].src + '"></img></span>';
-            mapdrawmenuhtml += '<span class="PMDrawBtn" id="PMDrawBtnMove"><img title="Move" src="' + vgap.plugins["plManagerPlugin"].pmmiNormal[0].src + '"></img></span>';
-            mapdrawmenuhtml += '<span class="PMDrawBtn" id="PMDrawBtnCircle"><img title="Circle" src="' + vgap.plugins["plManagerPlugin"].pmmiNormal[1].src + '"></img></span>';
-            mapdrawmenuhtml += '<span class="PMDrawBtn" id="PMDrawBtnRect"><img title="Rectangle" src="' + vgap.plugins["plManagerPlugin"].pmmiNormal[2].src + '"></img></span>';
-            mapdrawmenuhtml += '<span class="PMDrawBtn" id="PMDrawBtnArrow"><img title="Arrow" src="' + vgap.plugins["plManagerPlugin"].pmmiNormal[3].src + '"></img></span>';
-            mapdrawmenuhtml += '<span class="PMMapBtn" id="PMDrawBtnTarget"><img title="Target" src="' + vgap.plugins["plManagerPlugin"].pmmiNormal[0].src + '"></img></span>';
-            mapdrawmenuhtml += '<span class="PMDrawBtn" id="PMDrawBtnLine"><img title="Line" src="' + vgap.plugins["plManagerPlugin"].pmmiNormal[2].src + '"></img></span>';
-            mapdrawmenuhtml += '<hr /><hr /><span class="PMDrawBtn" id="PMDrawBtnDone"><img title="Done" src="' + vgap.plugins["plManagerPlugin"].pmmiNormal[2].src + '"></img></span>';
-            mapdrawmenuhtml += '<hr /></div>';
-            
-            $(mapdrawmenuhtml).appendTo(vgap.container);
-            
-            $('#PMDrawBtnDone').click(function() {
+			mapdrawmenuhtml += '<div id="PMMapDrawBar">Draw';
+			mapdrawmenuhtml += '<hr />General<span class="PMDrawBtn" id="PMMapBtnBarName"><img title="Planet Names" src="' + vgap.plugins["plManagerPlugin"].pmmiNormal[0].src + '"></img></span>';
+			mapdrawmenuhtml += '<span class="PMDrawBtn" id="PMDrawBtnSelect"><img title="Select" src="' + vgap.plugins["plManagerPlugin"].pmmiNormal[2].src + '"></img></span>';
+			mapdrawmenuhtml += '<span class="PMDrawBtn" id="PMDrawBtnMove"><img title="Move" src="' + vgap.plugins["plManagerPlugin"].pmmiNormal[0].src + '"></img></span>';
+			mapdrawmenuhtml += '<span class="PMDrawBtn" id="PMDrawBtnCircle"><img title="Circle" src="' + vgap.plugins["plManagerPlugin"].pmmiNormal[1].src + '"></img></span>';
+			mapdrawmenuhtml += '<span class="PMDrawBtn" id="PMDrawBtnRect"><img title="Rectangle" src="' + vgap.plugins["plManagerPlugin"].pmmiNormal[2].src + '"></img></span>';
+			mapdrawmenuhtml += '<span class="PMDrawBtn" id="PMDrawBtnArrow"><img title="Arrow" src="' + vgap.plugins["plManagerPlugin"].pmmiNormal[3].src + '"></img></span>';
+			mapdrawmenuhtml += '<span class="PMMapBtn" id="PMDrawBtnTarget"><img title="Target" src="' + vgap.plugins["plManagerPlugin"].pmmiNormal[0].src + '"></img></span>';
+			mapdrawmenuhtml += '<span class="PMDrawBtn" id="PMDrawBtnLine"><img title="Line" src="' + vgap.plugins["plManagerPlugin"].pmmiNormal[2].src + '"></img></span>';
+			mapdrawmenuhtml += '<hr /><hr /><span class="PMDrawBtn" id="PMDrawBtnDone"><img title="Done" src="' + vgap.plugins["plManagerPlugin"].pmmiNormal[2].src + '"></img></span>';
+			mapdrawmenuhtml += '<hr /></div>';
+			
+			$(mapdrawmenuhtml).appendTo(vgap.container);
+			
+			$('#PMDrawBtnDone').click(function() {
 				vgap.hotkeysOn = false;
 				$('#PlanetsLoc').animate(
 					{
@@ -662,8 +746,11 @@ box-shadow: 2px 2px 2px #777777}");
  
 					plg.PMonPaint();
 				}, false);
-          
+		  
 			});
+		*/
+		
+			
 		},
 		
 		PMonPaint: function() {
@@ -1530,6 +1617,7 @@ box-shadow: 2px 2px 2px #777777}");
         fcrandomize: true,
         overtax: true,
         
+        
 		// PM Map overlay variables
 		pmmOvAct: true,
 		pmmNeut: false,
@@ -1546,6 +1634,8 @@ box-shadow: 2px 2px 2px #777777}");
 		pmmiNormal: [],
 		pmmiHover: [],
 		pmmBtns: [],
+		pmmiExpImg: "",
+		showOverlayMenu: true,
 		
 		// PM Map Image variables
 		pmiNeutN: new Image(),
@@ -1737,7 +1827,7 @@ box-shadow: 2px 2px 2px #777777}");
                 html += "<td><input type='checkbox' name='RndFCCheck' id='RandomizeFCsCheck' value ='c' " + (vgap.plugins["plManagerPlugin"].fcrandomize ? "checked" : "") + "/>Randomize Friendly Codes<br /></td></tr>";
                 html += "</table><br />";
                 
-                /*
+                
 					html += "<br><table id='GMATable' border='0' width='100%'>";
 					html += "<tr><td colspan = 3><h3>Global Method Application</h3></td></tr>";
 					html += "<tr><td colspan = 3 id='warntext'>Warning: Applying a method globally will overwrite any existing method assignments.</td></tr>";
@@ -1746,7 +1836,7 @@ box-shadow: 2px 2px 2px #777777}");
 					html += "<td>" + ntmrevhtml + "</td></tr>";
 					html += "</table><br />";
                     //this.pane = $(html).appendTo(vgap.dash.content);
-                    */
+                    
                     
                     html += "<table id='PLPlanetTable' align='left' class='CleanTable' border='0' width='100%' style='cursor:pointer;'><thead>";
                     //html += "<tr><th rowspan = 4></th><th rowspan = 4 align='left'>Planet</th><th rowspan = 4 title='Method' align='left'>Planetary Building Method</th><th rowspan = 4 title='Population' align='left'>Population</th><th rowspan = 4 title='Money' align='left'>Money</th><th rowspan = 4 title='Buildings' align='center' colspan=4>Buildings</th><th rowspan=4 colspan = 5 title='Mineral'>Minerals</th></tr>";
@@ -1988,7 +2078,7 @@ box-shadow: 2px 2px 2px #777777}");
                         
                         $(html).appendTo("#PlanetRows");
                     }
-                    
+                    /*
                     //html = "</table><br><table id='GMATable' border='0' width='100%'>";
                     html = "<tr><td colspan = 7><h3>Global Method Application</h3></td></tr>";
                     html += "<tr><td colspan = 7 id='warntext'>Warning: Applying a method globally will overwrite any existing method assignments.</td></tr>";
@@ -1996,7 +2086,7 @@ box-shadow: 2px 2px 2px #777777}");
                     html += "<td colspan = 2>" + ctmrevhtml + "</td>";
                     html += "<td colspan = 2>" + ntmrevhtml + "</td></tr>";
                     $(html).appendTo("#PlanetRows");	
-                    
+                    */
                     $('.PLInfoTable').click(function() {
                         plg.showPlanetDetail(($(this).attr('data-plid')));
                     });
